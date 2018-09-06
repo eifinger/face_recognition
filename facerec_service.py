@@ -118,7 +118,7 @@ def web_faces():
     elif request.method == 'DELETE':
         faces_dict.pop(request.args.get('id'))
 
-    return jsonify(list(faces_dict.keys()))
+    return jsonify(list(set(faces_dict.values())))
 
 
 def extract_image(request):
