@@ -89,7 +89,7 @@ def detect_faces_in_image(file_stream):
 def get_name_for_face_encoding(face_encoding):
     global faces_list
     for entry in faces_list:
-        if entry[0] == face_encoding:
+        if np.array_equal(entry[0], face_encoding):
             return entry[1]
 
 # <Picture functions> #
