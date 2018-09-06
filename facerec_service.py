@@ -6,6 +6,8 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 from werkzeug.exceptions import BadRequest
 
+import numpy as np
+
 # Global storage for images
 faces_dict = {}
 
@@ -48,7 +50,7 @@ def calc_face_encoding(image):
 
 def get_faces_dict(path):
     image_files = get_all_picture_files(path)
-    return dict([(calc_face_encoding(image), remove_file_ext(image))
+    return dict([tuple((calc_face_encoding(image)), remove_file_ext(image))
                  for image in image_files])
 
 
@@ -64,13 +66,13 @@ def detect_faces_in_image(file_stream):
     faces = []
 
     if count:
-        face_encodings = list(faces_dict.keys())
+        face_encodings = [ np.asarray(k) for k in faces_dict.keys() ]
         for uploaded_face in uploaded_faces:
             face = {}
             for face_encoding in face_encodings:
                 dist = face_recognition.face_distance(face_encodings,
                             uploaded_face)[0]
-                name = faces_dict[face_encoding]
+                name = faces_dict[tuple(face_encoding)]
                 #Check if we found a match with a lower distance (higher resemblance)
                 if not "dist" in face or dist < face["dist"]:
                     face["id"] = name
@@ -111,12 +113,12 @@ def web_faces():
     if request.method == 'POST':
         try:
             new_encoding = calc_face_encoding(file)
-            faces_dict.update({new_encoding: request.args.get('id')})
+            faces_dict.update({tuple(new_encoding): request.args.get('id')})
         except Exception as exception:
             raise BadRequest(exception)
 
     elif request.method == 'DELETE':
-        faces_dict.pop(request.args.get('id'))
+        faces_dict = {key:val for key, val in faces_dict.items() if val != request.args.get('id')}
 
     return jsonify(list(set(faces_dict.values())))
 
