@@ -79,7 +79,7 @@ def detect_faces_in_image(file_stream):
                     face["id"] = name
                     face["dist"] = dist
             #only append if at least one face found
-            if ["id"] in face:
+            if "id" in face:
                 faces.append(face)
     return {
         "count": count,
