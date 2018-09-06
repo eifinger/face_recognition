@@ -71,7 +71,7 @@ def detect_faces_in_image(file_stream):
         for uploaded_face in uploaded_faces:
             face = {}
             for face_encoding in face_encodings:
-                dist = face_recognition.face_distance(face_encoding,
+                dist = face_recognition.face_distance([face_encoding],
                             uploaded_face)[0]
                 name = get_name_for_face_encoding(face_encoding)
                 #Check if we found a match with a lower distance (higher resemblance)
