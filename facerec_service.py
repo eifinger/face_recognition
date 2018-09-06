@@ -9,7 +9,7 @@ from werkzeug.exceptions import BadRequest
 import numpy as np
 
 # Global storage for images
-faces_dict = {}
+faces_list = []
 
 # Create flask app
 app = Flask(__name__)
@@ -50,12 +50,12 @@ def calc_face_encoding(image):
 
 def get_faces_dict(path):
     image_files = get_all_picture_files(path)
-    return dict([tuple((calc_face_encoding(image)), remove_file_ext(image))
+    return list([(calc_face_encoding(image), remove_file_ext(image))
                  for image in image_files])
 
 
 def detect_faces_in_image(file_stream):
-    global faces_dict
+    global faces_list
     # Load the uploaded image file
     img = face_recognition.load_image_file(file_stream)
 
@@ -67,13 +67,13 @@ def detect_faces_in_image(file_stream):
     faces = []
 
     if count:
-        face_encodings = [ np.asarray(k) for k in faces_dict.keys() ]
+        face_encodings = [ f[0] for f in faces_list ]
         for uploaded_face in uploaded_faces:
             face = {}
             for face_encoding in face_encodings:
                 dist = face_recognition.face_distance(face_encoding,
                             uploaded_face)[0]
-                name = faces_dict[tuple(face_encoding)]
+                name = get_name_for_face_encoding(face_encoding)
                 #Check if we found a match with a lower distance (higher resemblance)
                 if not "dist" in face or dist < face["dist"]:
                     face["id"] = name
@@ -85,6 +85,12 @@ def detect_faces_in_image(file_stream):
         "count": count,
         "faces": faces
     }
+
+def get_name_for_face_encoding(face_encoding):
+    global faces_list
+    for entry in faces_list:
+        if entry[0] == face_encoding:
+            return entry[1]
 
 # <Picture functions> #
 
@@ -104,10 +110,10 @@ def web_recognize():
 
 @app.route('/faces', methods=['GET', 'POST', 'DELETE'])
 def web_faces():
-    global faces_dict
+    global faces_list
     # GET
     if request.method == 'GET':
-        return jsonify(list(set(faces_dict.values())))
+        return jsonify(list(set([ f[0] for f in faces_list ])))
 
     # POST/DELETE
     file = extract_image(request)
@@ -117,14 +123,14 @@ def web_faces():
     if request.method == 'POST':
         try:
             new_encoding = calc_face_encoding(file)
-            faces_dict.update({tuple(new_encoding): request.args.get('id')})
+            faces_list.append(new_encoding, request.args.get('id'))
         except Exception as exception:
             raise BadRequest(exception)
 
     elif request.method == 'DELETE':
-        faces_dict = {key:val for key, val in faces_dict.items() if val != request.args.get('id')}
+        faces_list = [key,val for key, val in faces_list if val != request.args.get('id')]
 
-    return jsonify(list(set(faces_dict.values())))
+    return jsonify(list(set([ f[0] for f in faces_list ])))
 
 
 def extract_image(request):
