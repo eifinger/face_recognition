@@ -123,12 +123,14 @@ def web_faces():
     if request.method == 'POST':
         try:
             new_encoding = calc_face_encoding(file)
-            faces_list.append(new_encoding, request.args.get('id'))
+            faces_list.append([new_encoding, request.args.get('id')])
         except Exception as exception:
             raise BadRequest(exception)
 
     elif request.method == 'DELETE':
-        faces_list = [key,val for key, val in faces_list if val != request.args.get('id')]
+        for entry in faces_list:
+            if entry[1] == request.args.get('id'):
+                faces_list.remove(entry)
 
     return jsonify(list(set([ f[0] for f in faces_list ])))
 
