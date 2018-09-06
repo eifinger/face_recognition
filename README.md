@@ -29,7 +29,7 @@ Simple `POST` an image-file to the `/faces` endpoint and provide an identifier.
 
 ### Read registered faces
 
-Simple `GET` the `/register` endpoint.
+Simple `GET` the `/faces` endpoint.
 `curl http://localhost:8080/faces`
 
 ### Identify faces on image
