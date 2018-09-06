@@ -113,7 +113,7 @@ def web_faces():
     global faces_list
     # GET
     if request.method == 'GET':
-        return jsonify(list(set([ f[0] for f in faces_list ])))
+        return jsonify(list(set([ f[1] for f in faces_list ])))
 
     # POST/DELETE
     file = extract_image(request)
@@ -132,7 +132,7 @@ def web_faces():
             if entry[1] == request.args.get('id'):
                 faces_list.remove(entry)
 
-    return jsonify(list(set([ f[0] for f in faces_list ])))
+    return jsonify(list(set([ f[1] for f in faces_list ])))
 
 
 def extract_image(request):
