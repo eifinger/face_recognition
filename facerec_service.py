@@ -48,7 +48,7 @@ def calc_face_encoding(image):
 
 def get_faces_dict(path):
     image_files = get_all_picture_files(path)
-    return dict([(remove_file_ext(image), calc_face_encoding(image))
+    return dict([(calc_face_encoding(image), remove_file_ext(image))
                  for image in image_files])
 
 
@@ -64,13 +64,13 @@ def detect_faces_in_image(file_stream):
     faces = []
 
     if faces_found:
-        face_encodings = list(faces_dict.values())
+        face_encodings = list(faces_dict.keys())
         for uploaded_face in uploaded_faces:
             match_results = face_recognition.compare_faces(
                 face_encodings, uploaded_face)
             for idx, match in enumerate(match_results):
                 if match:
-                    match = list(faces_dict.keys())[idx]
+                    match = faces_dict[list(faces_dict.keys())[idx]]
                     match_encoding = face_encodings[idx]
                     dist = face_recognition.face_distance([match_encoding],
                             uploaded_face)[0]
@@ -104,7 +104,7 @@ def web_recognize():
 def web_faces():
     # GET
     if request.method == 'GET':
-        return jsonify(list(faces_dict.keys()))
+        return jsonify(list(set(faces_dict.values())))
 
     # POST/DELETE
     file = extract_image(request)
@@ -114,7 +114,7 @@ def web_faces():
     if request.method == 'POST':
         try:
             new_encoding = calc_face_encoding(file)
-            faces_dict.update({request.args.get('id'): new_encoding})
+            faces_dict.update({new_encoding: request.args.get('id')})
         except Exception as exception:
             raise BadRequest(exception)
 
