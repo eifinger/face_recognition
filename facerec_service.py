@@ -78,7 +78,7 @@ def detect_faces_in_image(file_stream):
                 if not "dist" in face or dist < face["dist"]:
                     face["id"] = name
                     face["dist"] = dist
-                faces.append(face)
+            faces.append(face)
     return {
         "count": count,
         "faces": faces
@@ -141,7 +141,6 @@ def extract_image(request):
 if __name__ == "__main__":
     print("Starting by generating encodings for found images...")
     # Calculate known faces
-    global faces_dict
     faces_dict = get_faces_dict("/root/faces")
 
     # Start app
