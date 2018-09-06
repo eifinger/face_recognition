@@ -55,6 +55,7 @@ def get_faces_dict(path):
 
 
 def detect_faces_in_image(file_stream):
+    global faces_dict
     # Load the uploaded image file
     img = face_recognition.load_image_file(file_stream)
 
@@ -101,6 +102,7 @@ def web_recognize():
 
 @app.route('/faces', methods=['GET', 'POST', 'DELETE'])
 def web_faces():
+    global faces_dict
     # GET
     if request.method == 'GET':
         return jsonify(list(set(faces_dict.values())))
@@ -139,6 +141,7 @@ def extract_image(request):
 if __name__ == "__main__":
     print("Starting by generating encodings for found images...")
     # Calculate known faces
+    global faces_dict
     faces_dict = get_faces_dict("/root/faces")
 
     # Start app
