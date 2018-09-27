@@ -116,12 +116,12 @@ def web_faces():
         return jsonify(list(set([ f[1] for f in faces_list ])))
 
     # POST/DELETE
-    file = extract_image(request)
     if 'id' not in request.args:
         raise BadRequest("Identifier for the face was not given!")
 
     if request.method == 'POST':
         try:
+            file = extract_image(request)
             new_encoding = calc_face_encoding(file)
             faces_list.append([new_encoding, request.args.get('id')])
         except Exception as exception:
